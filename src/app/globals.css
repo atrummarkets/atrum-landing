@@ -1,0 +1,265 @@
+/* ==========================================================================
+   ATRUM — landing experience
+   Tokens are generated from atrum-brand-kit/tokens/atrum.tokens.json.
+   Never write a raw value below; reference the custom property.
+   ========================================================================== */
+
+:root {
+  /* --- Material: the void ------------------------------------------------ */
+  --atrum-void:      #06070A;  /* ground — blue-black, never #000000        */
+  --atrum-basalt:    #0D0F14;  /* plane 1                                    */
+  --atrum-graphite:  #15181F;  /* plane 2                                    */
+  --atrum-slate:     #1F242D;  /* rules                                      */
+  --atrum-iron:      #333A45;  /* inert                                      */
+  --atrum-ash:       #5A6472;  /* non-text UI · 3.36:1                       */
+  --atrum-smoke:     #8B94A3;  /* text secondary · 6.58:1                    */
+  --atrum-pewter:    #B9C0CA;  /* text tertiary · 10.99:1                    */
+  --atrum-bone:      #E8E4DC;  /* text primary · 15.89:1                     */
+  --atrum-ivory:     #F5F1E8;  /* highest light · 17.87:1                    */
+
+  /* --- Light: the beam. Together these stay under 1% of any surface. ----- */
+  --atrum-halo:      #F0D9B0;
+  --atrum-champagne: #C9A96E;
+  --atrum-ember:     #B03A24;
+
+  /* --- Semantic ----------------------------------------------------------- */
+  --bg:          var(--atrum-void);
+  --bg-raised:   var(--atrum-basalt);
+  --bg-panel:    var(--atrum-graphite);
+  --bg-inset:    #090A0E;
+  --rule:        rgba(232, 228, 220, 0.10);
+  --rule-strong: rgba(232, 228, 220, 0.22);
+  --text:        var(--atrum-bone);
+  --text-2:      var(--atrum-smoke);
+  --text-3:      var(--atrum-ash);
+  --veil:        rgba(6, 7, 10, 0.78);
+
+  --outcome-yes: var(--atrum-ivory);   /* light returns — never green */
+  --outcome-no:  var(--atrum-ash);     /* light withheld — never red  */
+  --resolved:    var(--atrum-halo);
+  --sealed:      var(--atrum-ash);
+  --danger:      var(--atrum-ember);
+  --inert:       var(--atrum-iron);
+
+  /* --- Type --------------------------------------------------------------- */
+  --font-wordmark: var(--font-syne), sans-serif;
+  --font-display:  var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-text:     var(--font-manrope), system-ui, -apple-system, sans-serif;
+  --font-mono:     var(--font-geist-mono), ui-monospace, Menlo, monospace;
+
+  --t-hero:    clamp(48px, 8vw, 112px);
+  --t-h1:      clamp(38px, 5.4vw, 68px);
+  --t-h2:      clamp(28px, 3.4vw, 42px);
+  --t-h3:      24px;
+  --t-lead:    20px;
+  --t-body:    17px;
+  --t-small:   15px;
+  --t-caption: 13px;
+  --t-label:   11px;
+  --t-mono:    14px;
+
+  --tr-wordmark: 0.16em;
+  --tr-display:  0.02em;
+  --tr-label:    0.16em;
+  --tr-body:     -0.005em;
+
+  /* --- Space: 8-point. No values between steps. --------------------------- */
+  --s-1: 4px;   --s-2: 8px;    --s-3: 16px;  --s-4: 24px;
+  --s-5: 32px;  --s-6: 48px;   --s-7: 64px;  --s-8: 96px;
+  --s-9: 128px; --s-10: 160px; --s-11: 224px;
+
+  /* --- Geometry: stone is cut, not moulded. ------------------------------- */
+  --r-none: 0px;
+  --r-control: 2px;
+  --r-full: 999px;
+
+  /* --- Motion -------------------------------------------------------------- */
+  --d-1: 160ms;   /* control feedback                                        */
+  --d-2: 260ms;   /* local transition                                        */
+  --d-3: 440ms;   /* panel / overlay                                         */
+  --d-4: 900ms;   /* aperture reveal — events of consequence only            */
+  --d-5: 3200ms;  /* ambient light drift — below noticed motion              */
+  --e-reveal: cubic-bezier(0.16, 1, 0.30, 1);
+  --e-move:   cubic-bezier(0.65, 0, 0.35, 1);
+  --e-exit:   cubic-bezier(0.40, 0, 1, 1);
+
+  /* --- Layout -------------------------------------------------------------- */
+  --page-max: 1512px;
+  --measure: 68ch;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  /* The scene is a fixed canvas; only the scroll track should ever scroll. */
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: var(--t-body);
+  letter-spacing: var(--tr-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--atrum-bone);
+  color: var(--atrum-void);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+/* --- Type roles ----------------------------------------------------------- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.96;
+  letter-spacing: var(--tr-display);
+  text-transform: uppercase;
+  color: var(--atrum-ivory);
+  text-wrap: balance;
+}
+
+.label {
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: var(--t-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono);
+}
+
+.body {
+  max-width: var(--measure);
+  line-height: 1.75;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+/* The aperture: the system's only gradient. Models light through an opening. */
+.aperture {
+  background: radial-gradient(
+    ellipse 60% 46% at 50% 34%,
+    rgba(240, 217, 176, 0.18) 0%,
+    rgba(240, 217, 176, 0.05) 34%,
+    transparent 62%
+  );
+}
+
+/* Chrome is a behaviour, not a colour. Emblem and wordmark only.
+   These are the exact ramp and shadows the shipped site uses — the mark is
+   already recognised in this form, so it is carried over rather than redrawn. */
+.chrome {
+  background: linear-gradient(
+    177deg,
+    #FFFFFF 3%, #F7F2E8 22%, #8B9096 46%, #FDFCF8 60%, #9AA0A6 76%, #ECE7DA 96%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 60px rgba(6, 7, 10, 0.95))
+    drop-shadow(0 0 120px rgba(240, 217, 176, 0.14));
+}
+
+/* The display lockup: Syne ExtraBold, set tight. Never the wide wordmark
+   tracking — that is for the small lockup, not for headline sizes. */
+.wordmark {
+  font-family: var(--font-wordmark);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.022em;
+  text-transform: uppercase;
+}
+
+/* --- Focus: visible, and never only a colour change ----------------------- */
+:focus-visible {
+  outline: 1px solid var(--atrum-halo);
+  outline-offset: 3px;
+}
+
+/* Keyboard escape hatch out of the cinematic sequence, straight to the CTA. */
+.skip-link {
+  position: fixed;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 100;
+  padding: var(--s-3) var(--s-4);
+  background: var(--bg-raised);
+  border: 1px solid var(--rule-strong);
+  color: var(--text);
+  font-size: var(--t-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  transform: translateY(-200%);
+  transition: transform var(--d-2) var(--e-move);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Portraits sit at ash until hovered, so the credit stays quiet by default. */
+.builder img {
+  opacity: 0.8;
+  transition: opacity var(--d-3) var(--e-reveal);
+}
+.builder:hover img,
+.builder:focus-visible img {
+  opacity: 1;
+}
+
+/* --- Narrow screens --------------------------------------------------------
+   The rail keeps its full touch targets; only its labels are dropped, since
+   there is no room for them beside the copy on a phone.
+   ------------------------------------------------------------------------- */
+@media (max-width: 880px) {
+  .act-rail span:first-child {
+    display: none;
+  }
+}
+
+/* --- Reduced motion -------------------------------------------------------
+   Collapse durations so transitions land instantly. The scroll choreography
+   reads the same media query in JS and cuts between camera marks rather than
+   easing; structure and copy are never removed, only the motion.
+   ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-1: 0.01ms;
+    --d-2: 0.01ms;
+    --d-3: 0.01ms;
+    --d-4: 0.01ms;
+    --d-5: 0.01ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
