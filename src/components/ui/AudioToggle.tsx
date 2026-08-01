@@ -64,7 +64,7 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     lfo.connect(lfoGain).connect(filter.frequency);
     lfo.start();
 
-    master.gain.linearRampToValueAtTime(0.09, ctx.currentTime + 3.2);
+    master.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 3.2);
 
     ctxRef.current = ctx;
     gainRef.current = master;
@@ -81,7 +81,7 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     const next = !on;
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(next ? 0.09 : 0, ctx.currentTime + 1.1);
+    master.gain.linearRampToValueAtTime(next ? 0.22 : 0, ctx.currentTime + 1.1);
     if (next) void ctx.resume();
     setOn(next);
   };
