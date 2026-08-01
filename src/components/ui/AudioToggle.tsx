@@ -6,28 +6,34 @@ import { useEffect, useRef, useState } from "react";
  * Ambient sound.
  *
  * Muted by default and never auto-started: browsers block un-gestured audio,
- * and starting a drone unannounced is hostile regardless of policy. The
+ * and starting a track unannounced is hostile regardless of policy. The
  * trade-off is that plenty of visitors will never hear it, so the control is
  * given real weight and a label rather than being a 16px speaker in a corner —
  * it should read as an offer, not an afterthought.
  *
- * The bed is synthesised with the Web Audio API rather than downloaded: two
- * detuned low oscillators through a slow filter sweep is a convincing room
- * tone for a few hundred bytes of code instead of a multi-megabyte loop.
+ * The bed loops from /audio/bgm.mp3, routed through a GainNode so play/pause
+ * gets the same smooth fade the old synthesised drone had, rather than an
+ * abrupt cut.
  */
 export function AudioToggle({ ready }: { ready: boolean }) {
   const [on, setOn] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
 
   useEffect(
     () => () => {
+      audioRef.current?.pause();
       ctxRef.current?.close().catch(() => {});
     },
     []
   );
 
   const start = () => {
+    const audio = new Audio("/audio/bgm.mp3");
+    audio.loop = true;
+    audio.crossOrigin = "anonymous";
+
     const AudioCtor =
       window.AudioContext ??
       (window as unknown as { webkitAudioContext: typeof AudioContext })
@@ -37,35 +43,12 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     const master = ctx.createGain();
     master.gain.value = 0;
     master.connect(ctx.destination);
+    ctx.createMediaElementSource(audio).connect(master);
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 220;
-    filter.Q.value = 0.7;
-    filter.connect(master);
-
-    // Two oscillators a few cents apart beat slowly against each other, which
-    // is what stops a synthesised drone from sounding like a test tone.
-    for (const freq of [55, 55.6, 82.5]) {
-      const osc = ctx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const g = ctx.createGain();
-      g.gain.value = freq > 80 ? 0.16 : 0.4;
-      osc.connect(g).connect(filter);
-      osc.start();
-    }
-
-    // Slow filter drift, well below the rate anyone would consciously track.
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.045;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 90;
-    lfo.connect(lfoGain).connect(filter.frequency);
-    lfo.start();
-
+    void audio.play();
     master.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 3.2);
 
+    audioRef.current = audio;
     ctxRef.current = ctx;
     gainRef.current = master;
   };
@@ -82,7 +65,12 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
     master.gain.linearRampToValueAtTime(next ? 0.22 : 0, ctx.currentTime + 1.1);
-    if (next) void ctx.resume();
+    if (next) {
+      void ctx.resume();
+      void audioRef.current?.play();
+    } else {
+      window.setTimeout(() => audioRef.current?.pause(), 1150);
+    }
     setOn(next);
   };
 
