@@ -5,7 +5,9 @@ import { Canvas } from "@react-three/fiber";
 import { Environment, Preload } from "@react-three/drei";
 import * as THREE from "three";
 
+import { mobileAsset } from "@/lib/assets";
 import { LAYOUT } from "@/lib/camera-path";
+import { useHdriSource } from "@/lib/hdri";
 import { useScene } from "@/lib/progress";
 import { TIER_SETTINGS } from "@/lib/tier";
 
@@ -42,14 +44,20 @@ function ReadyGate({ onReady }: { onReady: () => void }) {
 function Contents({ mobile }: { mobile: boolean }) {
   const { tier } = useScene();
   const settings = TIER_SETTINGS[tier];
+  const hdriSrc = useHdriSource();
 
   return (
     <>
       {/* Night-sky ambient. Held low: it lights stone, it must not lift the
-          void off black. The emblem overrides this with its own env map. */}
-      <Suspense fallback={null}>
-        <Environment files="/hdri/night-sky.exr" environmentIntensity={0.3} />
-      </Suspense>
+          void off black. The emblem overrides this with its own env map.
+          The source is picked by useHdriSource: the full EXR when it can
+          land quickly, a much smaller HDR fallback otherwise, so a slow
+          connection can never hang the boot sequence on this one asset. */}
+      {hdriSrc && (
+        <Suspense fallback={null}>
+          <Environment files={hdriSrc} environmentIntensity={0.3} />
+        </Suspense>
+      )}
 
       {/* One dominant key from upper left, matching how every asset was lit,
           plus a cold fill so the shadow side does not go fully dead. */}
@@ -67,14 +75,14 @@ function Contents({ mobile }: { mobile: boolean }) {
 
       <fog attach="fog" args={["#06070A", 18, 108]} />
 
-      <Ground tier={tier} />
+      <Ground tier={tier} mobile={mobile} />
 
       {/* Far backdrop. Its baked vignette and horizon are an asset at this
           distance, where they read as sky rather than as a constraint. It has
           no alpha, so it must stay wider than every camera's frustum or its
           own rectangle edge shows against the void. */}
       <Plate
-        url="/scene/backdrop.png"
+        url={mobileAsset("/scene/backdrop.png", mobile)}
         height={LAYOUT.backdrop.scale}
         position={[0, LAYOUT.backdrop.y, LAYOUT.backdrop.z]}
         tone={0.5}
@@ -83,7 +91,7 @@ function Contents({ mobile }: { mobile: boolean }) {
       {/* Act I — the threshold the camera passes through. Fixed, never
           billboarded: yawing it would visibly swing the opening. */}
       <Plate
-        url="/scene/threshold-arch.png"
+        url={mobileAsset("/scene/threshold-arch.png", mobile)}
         height={LAYOUT.arch.scale}
         position={[0, LAYOUT.arch.y, LAYOUT.arch.z]}
       />
@@ -94,7 +102,7 @@ function Contents({ mobile }: { mobile: boolean }) {
 
       {/* Act II — the sentinel. */}
       <Plate
-        url="/scene/sentinel.png"
+        url={mobileAsset("/scene/sentinel.png", mobile)}
         height={LAYOUT.sentinel.scale}
         position={[0, LAYOUT.sentinel.y, LAYOUT.sentinel.z]}
         billboard
@@ -104,7 +112,7 @@ function Contents({ mobile }: { mobile: boolean }) {
       {LAYOUT.pillars.map((p, i) => (
         <Plate
           key={`pillar-${i}`}
-          url={`/scene/pillar-${p.sprite + 1}.png`}
+          url={mobileAsset(`/scene/pillar-${p.sprite + 1}.png`, mobile)}
           height={p.scale}
           position={[p.x, p.scale / 2, p.z]}
           billboard
@@ -116,7 +124,7 @@ function Contents({ mobile }: { mobile: boolean }) {
       {LAYOUT.debris.map((d, i) => (
         <Plate
           key={`debris-${i}`}
-          url={DEBRIS[i % DEBRIS.length]}
+          url={mobileAsset(DEBRIS[i % DEBRIS.length], mobile)}
           height={d.scale}
           position={[d.x, d.scale * 0.34, d.z]}
           billboard
@@ -128,7 +136,7 @@ function Contents({ mobile }: { mobile: boolean }) {
       {/* Act IV — the seal. Laid flat on the floor, because this is the one
           moment the camera rises and looks straight down at the ground. */}
       <Plate
-        url="/scene/dais.png"
+        url={mobileAsset("/scene/dais.png", mobile)}
         height={LAYOUT.seal.scale}
         position={[0, 0.02, LAYOUT.seal.z]}
         flat
@@ -136,13 +144,13 @@ function Contents({ mobile }: { mobile: boolean }) {
 
       {/* Act V — the dais, then the throne standing on it. */}
       <Plate
-        url="/scene/dais.png"
+        url={mobileAsset("/scene/dais.png", mobile)}
         height={LAYOUT.dais.scale * 0.4}
         position={[0, LAYOUT.dais.y, LAYOUT.dais.z]}
         rotation={0}
       />
       <Plate
-        url="/scene/throne.png"
+        url={mobileAsset("/scene/throne.png", mobile)}
         height={LAYOUT.throne.scale}
         position={[0, LAYOUT.throne.y, LAYOUT.throne.z]}
       />
@@ -152,15 +160,15 @@ function Contents({ mobile }: { mobile: boolean }) {
           the floor. */}
       {settings.fogLayers > 0 && (
         <>
-          <FogPlate url="/scene/fog-tendrils.png" height={9} position={[-2, 2.4, 8]} opacity={0.2} drift={0.02} />
-          <FogPlate url="/scene/fog1.png" height={14} position={[0, 1.4, -6]} opacity={0.3} phase={1.2} />
-          <FogPlate url="/scene/fog-column.png" height={13} position={[-6.5, 4.2, -16]} opacity={0.16} phase={2.1} />
-          <FogPlate url="/scene/fog-curtain.png" height={16} position={[7, 5, -24]} opacity={0.13} phase={0.4} />
+          <FogPlate url={mobileAsset("/scene/fog-tendrils.png", mobile)} height={9} position={[-2, 2.4, 8]} opacity={0.2} drift={0.02} />
+          <FogPlate url={mobileAsset("/scene/fog1.png", mobile)} height={14} position={[0, 1.4, -6]} opacity={0.3} phase={1.2} />
+          <FogPlate url={mobileAsset("/scene/fog-column.png", mobile)} height={13} position={[-6.5, 4.2, -16]} opacity={0.16} phase={2.1} />
+          <FogPlate url={mobileAsset("/scene/fog-curtain.png", mobile)} height={16} position={[7, 5, -24]} opacity={0.13} phase={0.4} />
           {settings.fogLayers > 4 && (
             <>
-              <FogPlate url="/scene/fog3.png" height={18} position={[0, 1.1, -31]} opacity={0.26} phase={3.3} />
-              <FogPlate url="/scene/fog-column.png" height={15} position={[5.5, 4.6, -38]} opacity={0.15} phase={4.0} />
-              <FogPlate url="/scene/fog2.png" height={22} position={[0, 2.2, -50]} opacity={0.22} phase={5.1} />
+              <FogPlate url={mobileAsset("/scene/fog3.png", mobile)} height={18} position={[0, 1.1, -31]} opacity={0.26} phase={3.3} />
+              <FogPlate url={mobileAsset("/scene/fog-column.png", mobile)} height={15} position={[5.5, 4.6, -38]} opacity={0.15} phase={4.0} />
+              <FogPlate url={mobileAsset("/scene/fog2.png", mobile)} height={22} position={[0, 2.2, -50]} opacity={0.22} phase={5.1} />
             </>
           )}
         </>

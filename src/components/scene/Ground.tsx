@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useTexture, MeshReflectorMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
+import { mobileAsset } from "@/lib/assets";
 import { TIER_SETTINGS, type Tier } from "@/lib/tier";
 
 /**
@@ -17,12 +18,12 @@ import { TIER_SETTINGS, type Tier } from "@/lib/tier";
  * NormalGL, not NormalDX: three.js follows the OpenGL green-channel
  * convention, and the DX map would invert every surface detail.
  */
-export function Ground({ tier }: { tier: Tier }) {
+export function Ground({ tier, mobile }: { tier: Tier; mobile: boolean }) {
   const settings = TIER_SETTINGS[tier];
   const [color, roughness, normal] = useTexture([
-    "/textures/tiles/color.jpg",
-    "/textures/tiles/roughness.jpg",
-    "/textures/tiles/normal.jpg",
+    mobileAsset("/textures/tiles/color.jpg", mobile),
+    mobileAsset("/textures/tiles/roughness.jpg", mobile),
+    mobileAsset("/textures/tiles/normal.jpg", mobile),
   ]);
 
   useMemo(() => {

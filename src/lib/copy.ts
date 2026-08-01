@@ -68,7 +68,7 @@ export const BUILDERS = [
     portrait: "/team/ayush.png",
   },
   {
-    name: "Divyansh",
+    name: "Divyanshh",
     handle: "divyanshh_kalra",
     portrait: "/team/divyansh.png",
   },

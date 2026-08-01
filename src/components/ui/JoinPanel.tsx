@@ -42,7 +42,10 @@ const field: React.CSSProperties = {
   border: "1px solid var(--rule-strong)",
   borderRadius: "var(--r-control)",
   color: "var(--text)",
-  fontSize: "var(--t-small)",
+  // 16px, not the --t-small token: anything smaller makes iOS Safari zoom
+  // the whole viewport in on focus, which is a jarring way to greet someone
+  // about to submit the one form on this page that matters.
+  fontSize: 16,
   outline: "none",
   backdropFilter: "blur(12px)",
 };

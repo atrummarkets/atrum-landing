@@ -30,7 +30,7 @@ export function BrandMark({ ready }: { ready: boolean }) {
         alt="Atrum"
         style={{
           display: "block",
-          height: 22,
+          height: 32,
           width: "auto",
           filter: "drop-shadow(0 0 16px rgba(6,7,10,0.9))",
         }}

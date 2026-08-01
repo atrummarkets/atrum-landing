@@ -52,7 +52,7 @@ export function FlatScene() {
           ...layer,
           y: sky,
           scale,
-          backgroundImage: "url(/scene/backdrop.png)",
+          backgroundImage: "url(/scene/backdrop-mobile.webp)",
           backgroundSize: "cover",
           opacity: 0.75,
         }}
@@ -61,7 +61,7 @@ export function FlatScene() {
         style={{
           ...layer,
           y: arch,
-          backgroundImage: "url(/scene/threshold-arch.png)",
+          backgroundImage: "url(/scene/threshold-arch-mobile.webp)",
           backgroundSize: "contain",
           opacity: 0.6,
         }}
@@ -70,7 +70,7 @@ export function FlatScene() {
         style={{
           ...layer,
           y: figure,
-          backgroundImage: "url(/scene/sentinel.png)",
+          backgroundImage: "url(/scene/sentinel-mobile.webp)",
           backgroundSize: "auto 68%",
           opacity: 0.9,
         }}
@@ -79,7 +79,7 @@ export function FlatScene() {
         style={{
           ...layer,
           y: near,
-          backgroundImage: "url(/scene/fog1.png)",
+          backgroundImage: "url(/scene/fog1-mobile.webp)",
           backgroundSize: "cover",
           mixBlendMode: "screen",
           opacity: 0.28,
