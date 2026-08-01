@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { setAudioBus } from "@/lib/audio";
+
 /**
  * Ambient sound.
  *
@@ -25,6 +27,7 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     () => () => {
       audioRef.current?.pause();
       ctxRef.current?.close().catch(() => {});
+      setAudioBus(null, null);
     },
     []
   );
@@ -51,6 +54,7 @@ export function AudioToggle({ ready }: { ready: boolean }) {
     audioRef.current = audio;
     ctxRef.current = ctx;
     gainRef.current = master;
+    setAudioBus(ctx, master);
   };
 
   const toggle = () => {

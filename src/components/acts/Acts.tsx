@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useTransform, type MotionValue } from "motion/react";
 
+import { playWhoosh } from "@/lib/audio";
 import { ACTS, BUILDERS, LAWS, MECHANISM, MARKETS } from "@/lib/copy";
 import { useScene } from "@/lib/progress";
 import type { FeedRow } from "@/lib/waitlist";
@@ -52,6 +53,26 @@ function usePassOpacity(actIndex: number, i: number, n: number): MotionValue<num
     [at, at + step * 0.72],
     reducedMotion ? [1, 1] : [0, 1]
   );
+}
+
+/**
+ * Fires a soft whoosh the moment a reveal crosses half-visible, once per
+ * pass. Silently a no-op while sound is off — see `playWhoosh`.
+ */
+function useWhooshOnReveal(opacity: MotionValue<number>) {
+  const fired = useRef(false);
+
+  useEffect(() => {
+    const unsubscribe = opacity.on("change", (v) => {
+      if (v > 0.5 && !fired.current) {
+        fired.current = true;
+        playWhoosh();
+      } else if (v < 0.5) {
+        fired.current = false;
+      }
+    });
+    return () => unsubscribe();
+  }, [opacity]);
 }
 
 /**
@@ -162,6 +183,7 @@ function Law({ law, index }: { law: (typeof LAWS)[number]; index: number }) {
   const opacity = usePassOpacity(2, index, LAWS.length);
   const { reducedMotion } = useScene();
   const x = useTransform(opacity, [0, 1], reducedMotion ? [0, 0] : [-14, 0]);
+  useWhooshOnReveal(opacity);
 
   return (
     <motion.div
@@ -175,6 +197,39 @@ function Law({ law, index }: { law: (typeof LAWS)[number]; index: number }) {
       </h3>
       <p className="body" style={{ margin: 0, fontSize: "var(--t-small)" }}>
         {law.body}
+      </p>
+    </motion.div>
+  );
+}
+
+/**
+ * One mechanism step, revealed the same way as a pillar — its own component
+ * so the per-item hook runs once per render rather than inside a loop.
+ */
+function MechanismStep({
+  step,
+  index,
+}: {
+  step: (typeof MECHANISM)[number];
+  index: number;
+}) {
+  const opacity = usePassOpacity(3, index, MECHANISM.length);
+  const { reducedMotion } = useScene();
+  const y = useTransform(opacity, [0, 1], reducedMotion ? [0, 0] : [14, 0]);
+  useWhooshOnReveal(opacity);
+
+  return (
+    <motion.div
+      style={{ opacity, y, display: "flex", flexDirection: "column", gap: "var(--s-2)" }}
+    >
+      <span className="label" style={{ color: "var(--atrum-champagne)" }}>
+        {step.n}
+      </span>
+      <h3 className="display" style={{ margin: 0, fontSize: "var(--t-h3)", color: "var(--text)" }}>
+        {step.title}
+      </h3>
+      <p className="body" style={{ margin: 0, fontSize: "var(--t-small)" }}>
+        {step.body}
       </p>
     </motion.div>
   );
@@ -269,21 +324,8 @@ export function Acts({
             width: "100%",
           }}
         >
-          {MECHANISM.map((step) => (
-            <div key={step.n} style={{ display: "flex", flexDirection: "column", gap: "var(--s-2)" }}>
-              <span className="label" style={{ color: "var(--atrum-champagne)" }}>
-                {step.n}
-              </span>
-              <h3
-                className="display"
-                style={{ margin: 0, fontSize: "var(--t-h3)", color: "var(--text)" }}
-              >
-                {step.title}
-              </h3>
-              <p className="body" style={{ margin: 0, fontSize: "var(--t-small)" }}>
-                {step.body}
-              </p>
-            </div>
+          {MECHANISM.map((step, i) => (
+            <MechanismStep key={step.n} step={step} index={i} />
           ))}
         </div>
 
