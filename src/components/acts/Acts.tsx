@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useTransform, type MotionValue } from "motion/react";
 
 import { ACTS, BUILDERS, LAWS, MECHANISM, MARKETS } from "@/lib/copy";
@@ -51,6 +52,26 @@ function usePassOpacity(actIndex: number, i: number, n: number): MotionValue<num
     [at, at + step * 0.72],
     reducedMotion ? [1, 1] : [0, 1]
   );
+}
+
+/**
+ * Discrete current act, for gating pointer-events on the interactive islands
+ * (oath form, builder links). Every act's section spans the full viewport at
+ * all times, distinguished only by opacity, so an unconditional `auto` on
+ * one act's controls leaves them clickable from every other act too.
+ */
+function useActiveIndex(): number {
+  const { progress } = useScene();
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = progress.on("change", (v) => {
+      setActive(Math.round(v * (COUNT - 1)));
+    });
+    return () => unsubscribe();
+  }, [progress]);
+
+  return active;
 }
 
 function useActShift(index: number): MotionValue<number> {
@@ -166,6 +187,7 @@ export function Acts({
   initialFeed: FeedRow[];
   countLabel: string;
 }) {
+  const active = useActiveIndex();
   return (
     <>
       {/* I — The Void. Atmosphere before information. */}
@@ -328,7 +350,10 @@ export function Acts({
         <p className="body" style={{ margin: 0 }}>
           {ACTS[5].body}
         </p>
-        <div id="oath" style={{ width: "min(100%, 620px)", pointerEvents: "auto" }}>
+        <div
+          id="oath"
+          style={{ width: "min(100%, 620px)", pointerEvents: active === 5 ? "auto" : "none" }}
+        >
           <JoinPanel countLabel={countLabel} />
           <LiveFeed initial={initialFeed} />
         </div>
@@ -356,7 +381,7 @@ export function Acts({
             flexWrap: "wrap",
             justifyContent: "center",
             marginTop: "var(--s-4)",
-            pointerEvents: "auto",
+            pointerEvents: active === 6 ? "auto" : "none",
           }}
         >
           {BUILDERS.map((person) => (
@@ -416,7 +441,7 @@ export function Acts({
             justifyContent: "space-between",
             gap: "var(--s-3)",
             flexWrap: "wrap",
-            pointerEvents: "auto",
+            pointerEvents: active === 6 ? "auto" : "none",
           }}
         >
           <span
