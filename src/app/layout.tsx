@@ -36,6 +36,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(`https://${SITE_ORIGIN}`),
   title: TITLE,
   description: DESCRIPTION,
+  // Fixed at "/" regardless of query string, so every "?ref=" invite
+  // variant of this page canonicalises back to the one URL instead of
+  // being indexed as separate near-duplicate pages.
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
@@ -67,6 +73,20 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
+// Minimal Organization schema: what makes ATRUM eligible to be recognised
+// as a brand entity (knowledge panel, rich result attribution) rather than
+// just an untyped page. No SearchAction/sitelinks search box — there is no
+// on-site search to back that claim.
+const ORGANIZATION_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "ATRUM",
+  url: `https://${SITE_ORIGIN}`,
+  logo: `https://${SITE_ORIGIN}/icon-512.png`,
+  description: DESCRIPTION,
+  sameAs: ["https://x.com/AtrumMarkets"],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -76,6 +96,11 @@ export default function RootLayout({
       className={`${syne.variable} ${barlowCondensed.variable} ${manrope.variable} ${geistMono.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }}
+        />
         {children}
         <Analytics />
       </body>
