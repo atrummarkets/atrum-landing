@@ -170,7 +170,7 @@ input {
   );
 }
 
-/* Chrome is a behaviour, not a colour. Emblem and wordmark only.
+/* Chrome is a behaviour, not a colour. Wordmark, emblem, and select headings.
    These are the exact ramp and shadows the shipped site uses — the mark is
    already recognised in this form, so it is carried over rather than redrawn. */
 .chrome {

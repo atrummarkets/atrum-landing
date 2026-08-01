@@ -178,7 +178,7 @@ export function Acts({
         >
           ATRUM
         </h1>
-        <p className="display" style={{ margin: 0, fontSize: "var(--t-h2)" }}>
+        <p className="display chrome" style={{ margin: 0, fontSize: "var(--t-h2)" }}>
           {ACTS[0].display}
         </p>
         <p className="body" style={{ margin: 0 }}>
@@ -194,7 +194,7 @@ export function Acts({
         <span className="label">{ACTS[1].label}</span>
         <h2
           id="act-sentinel"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)", maxWidth: "16ch" }}
         >
           {ACTS[1].display}
@@ -209,7 +209,7 @@ export function Acts({
         <span className="label">{ACTS[2].label}</span>
         <h2
           id="act-colonnade"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)" }}
         >
           {ACTS[2].display}
@@ -234,7 +234,7 @@ export function Acts({
         <span className="label">{ACTS[3].label}</span>
         <h2
           id="act-seal"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)" }}
         >
           {ACTS[3].display}
@@ -305,7 +305,7 @@ export function Acts({
         <span className="label">{ACTS[4].label}</span>
         <h2
           id="act-throne"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)", maxWidth: "18ch" }}
         >
           {ACTS[4].display}
@@ -320,7 +320,7 @@ export function Acts({
         <span className="label">{ACTS[5].label}</span>
         <h2
           id="act-oath"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)", maxWidth: "16ch" }}
         >
           {ACTS[5].display}
@@ -340,7 +340,7 @@ export function Acts({
         <span className="label">{ACTS[6].label}</span>
         <h2
           id="act-builders"
-          className="display"
+          className="display chrome"
           style={{ margin: 0, fontSize: "var(--t-h1)", maxWidth: "16ch" }}
         >
           {ACTS[6].display}
