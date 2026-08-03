@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 type JoinResult = {
   position: number;
   inviteCode: string;
+  accessCode: string;
   invitesUsed: number;
 };
 
@@ -84,6 +85,8 @@ export function JoinPanel({ countLabel }: { countLabel: string }) {
   const [result, setResult] = useState<JoinResult | null>(null);
   const [copied, setCopied] = useState(false);
   const copyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [copiedAccess, setCopiedAccess] = useState(false);
+  const copyAccessTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Restore a returning visitor's seat without making them re-type their email.
   useEffect(() => {
@@ -97,6 +100,7 @@ export function JoinPanel({ countLabel }: { countLabel: string }) {
   useEffect(
     () => () => {
       if (copyTimeout.current) clearTimeout(copyTimeout.current);
+      if (copyAccessTimeout.current) clearTimeout(copyAccessTimeout.current);
     },
     []
   );
@@ -130,6 +134,12 @@ export function JoinPanel({ countLabel }: { countLabel: string }) {
       navigator.clipboard?.writeText(inviteLink).catch(() => {});
       setCopied(true);
       copyTimeout.current = setTimeout(() => setCopied(false), 1800);
+    };
+
+    const handleCopyAccess = () => {
+      navigator.clipboard?.writeText(result.accessCode).catch(() => {});
+      setCopiedAccess(true);
+      copyAccessTimeout.current = setTimeout(() => setCopiedAccess(false), 1800);
     };
 
     return (
@@ -207,6 +217,34 @@ export function JoinPanel({ countLabel }: { countLabel: string }) {
           <a href={shareHref} target="_blank" rel="noopener" style={ghost}>
             Post it
           </a>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--s-2)" }}>
+          <span className="label" style={{ color: "var(--text-3)" }}>
+            Testnet access code — enter this at launch to get in
+          </span>
+          <div style={{ display: "flex", gap: "var(--s-2)", flexWrap: "wrap", alignItems: "center" }}>
+            <code
+              className="mono"
+              style={{
+                flex: 1,
+                minWidth: 180,
+                padding: "var(--s-3)",
+                background: "var(--bg-inset)",
+                border: "1px solid var(--rule)",
+                fontSize: "var(--t-caption)",
+                color: "var(--text)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {result.accessCode}
+            </code>
+            <button type="button" onClick={handleCopyAccess} style={ghost}>
+              {copiedAccess ? "Copied" : "Copy code"}
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import type { PoolClient } from "pg";
 import { getPool, withTransaction } from "./db";
 
@@ -17,6 +17,7 @@ export type WaitlistEntry = {
   id: number;
   position: number;
   inviteCode: string;
+  accessCode: string;
   invitesUsed: number;
   createdAt: string;
 };
@@ -41,6 +42,17 @@ function inviteCodeForId(id: number): string {
   return "ATR-" + id.toString(36).toUpperCase().padStart(4, "0");
 }
 
+/**
+ * Real access credential for the testnet gate — unlike inviteCodeForId,
+ * this must not be derivable from the row id (80 bits of CSPRNG).
+ */
+function generateAccessCode(): string {
+  const n = BigInt("0x" + randomBytes(10).toString("hex"));
+  const b36 = n.toString(36).toUpperCase().padStart(16, "0");
+  const grouped = b36.match(/.{1,4}/g)!.join("-");
+  return "AC-" + grouped;
+}
+
 /** Deterministic pseudonymous id for the public live feed, e.g. 0x4f2a…c91 */
 export function pseudonymFor(id: number): string {
   const hex = createHash("sha256").update(`${ID_SALT}:${id}`).digest("hex");
@@ -54,6 +66,7 @@ function pickActivityLabel(): string {
 function toEntry(row: {
   id: number;
   invite_code: string;
+  access_code: string;
   invites_used: number;
   created_at: Date;
 }): WaitlistEntry {
@@ -61,6 +74,7 @@ function toEntry(row: {
     id: row.id,
     position: row.id + BASE_COUNT,
     inviteCode: row.invite_code,
+    accessCode: row.access_code,
     invitesUsed: row.invites_used,
     createdAt: row.created_at.toISOString(),
   };
@@ -86,6 +100,7 @@ export async function joinWaitlist(
     const { rows } = await client.query<{
       id: number;
       invite_code: string | null;
+      access_code: string | null;
       invites_used: number;
       created_at: Date;
       inserted: boolean;
@@ -93,18 +108,34 @@ export async function joinWaitlist(
       `INSERT INTO waitlist_entries (email, email_normalized, referred_by_code, activity_label)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (email_normalized) DO UPDATE SET email_normalized = EXCLUDED.email_normalized
-       RETURNING id, invite_code, invites_used, created_at, (xmax = 0) AS inserted`,
+       RETURNING id, invite_code, access_code, invites_used, created_at, (xmax = 0) AS inserted`,
       [email, normalized, referredByCode, pickActivityLabel()]
     );
     const row = rows[0];
 
     if (row.inserted) {
       const code = inviteCodeForId(row.id);
+
+      // Collision odds at 80 bits are negligible; this loop is a formality,
+      // not a real-world concern. Checked ahead of the UPDATE rather than
+      // relying on the unique index, since a caught unique_violation would
+      // poison this transaction and roll back the row just inserted above.
+      let accessCode = generateAccessCode();
+      for (let attempts = 0; attempts < 5; attempts++) {
+        const { rows: clash } = await client.query(
+          `SELECT 1 FROM waitlist_entries WHERE access_code = $1`,
+          [accessCode]
+        );
+        if (clash.length === 0) break;
+        accessCode = generateAccessCode();
+      }
+
       await client.query(
-        `UPDATE waitlist_entries SET invite_code = $1 WHERE id = $2`,
-        [code, row.id]
+        `UPDATE waitlist_entries SET invite_code = $1, access_code = $2 WHERE id = $3`,
+        [code, accessCode, row.id]
       );
       row.invite_code = code;
+      row.access_code = accessCode;
 
       if (referredByCode) {
         await client.query(
@@ -119,10 +150,20 @@ export async function joinWaitlist(
     return toEntry({
       id: row.id,
       invite_code: row.invite_code as string,
+      access_code: row.access_code as string,
       invites_used: row.invites_used,
       created_at: row.created_at,
     });
   });
+}
+
+/** Used by the internal access-code validate endpoint. Returns a bare boolean by design — callers must never surface which row matched. */
+export async function isValidAccessCode(code: string): Promise<boolean> {
+  const { rows } = await getPool().query(
+    `SELECT 1 FROM waitlist_entries WHERE access_code = $1`,
+    [code.trim().toUpperCase()]
+  );
+  return rows.length > 0;
 }
 
 async function findByInviteCode(client: PoolClient, code: string) {

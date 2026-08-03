@@ -21,6 +21,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS waitlist_entries_email_normalized_key
 CREATE UNIQUE INDEX IF NOT EXISTS waitlist_entries_invite_code_key
   ON waitlist_entries (invite_code);
 
+-- Separate from invite_code: invite_code is sequential/guessable (base36 of
+-- the row id) and only tracks referrals. access_code is a real credential
+-- (80 bits of CSPRNG) checked by atrum-markets to gate testnet entry.
+ALTER TABLE waitlist_entries ADD COLUMN IF NOT EXISTS access_code TEXT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS waitlist_entries_access_code_key
+  ON waitlist_entries (access_code);
+
 -- Powers the live "who joined" feed (latest first).
 CREATE INDEX IF NOT EXISTS waitlist_entries_created_at_idx
   ON waitlist_entries (created_at DESC);

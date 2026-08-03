@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       position: entry.position,
       inviteCode: entry.inviteCode,
+      accessCode: entry.accessCode,
       invitesUsed: entry.invitesUsed,
     });
   } catch (err) {
