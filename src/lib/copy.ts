@@ -46,10 +46,10 @@ export const ACTS = [
   },
   {
     id: "oath",
-    nav: "The oath",
-    label: "V · The oath",
-    display: "The doors open once.",
-    body: "Atrum opens invite-only. Take the oath to hold a seat — earliest oath, earliest key.",
+    nav: "The doors",
+    label: "V · The doors",
+    display: "The doors are open.",
+    body: "Atrum is live. Enter the house.",
   },
   {
     id: "builders",

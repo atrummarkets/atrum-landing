@@ -6,10 +6,8 @@ import { motion, useTransform, type MotionValue } from "motion/react";
 import { playWhoosh } from "@/lib/audio";
 import { ACTS, BUILDERS, LAWS, MECHANISM, MARKETS } from "@/lib/copy";
 import { useScene } from "@/lib/progress";
-import type { FeedRow } from "@/lib/waitlist";
 
-import { JoinPanel } from "../ui/JoinPanel";
-import { LiveFeed } from "../ui/LiveFeed";
+const APP_URL = "https://markets.atrum.fun";
 
 const COUNT = ACTS.length;
 
@@ -235,13 +233,7 @@ function MechanismStep({
   );
 }
 
-export function Acts({
-  initialFeed,
-  countLabel,
-}: {
-  initialFeed: FeedRow[];
-  countLabel: string;
-}) {
+export function Acts() {
   const active = useActiveIndex();
   return (
     <>
@@ -396,8 +388,24 @@ export function Acts({
           id="oath"
           style={{ width: "min(100%, 620px)", pointerEvents: active === 5 ? "auto" : "none" }}
         >
-          <JoinPanel countLabel={countLabel} />
-          <LiveFeed initial={initialFeed} />
+          <a
+            href={APP_URL}
+            className="display"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              padding: "var(--s-4) var(--s-5)",
+              fontSize: "var(--t-h3)",
+              color: "var(--atrum-void)",
+              background: "var(--atrum-champagne)",
+              border: "1px solid var(--atrum-champagne)",
+              textDecoration: "none",
+            }}
+          >
+            Go to app
+          </a>
         </div>
 
       </Act>

@@ -7,7 +7,6 @@ import { useMotionValue } from "motion/react";
 import { ACTS } from "@/lib/copy";
 import { SceneContext } from "@/lib/progress";
 import { detectTier, prefersReducedMotion, type Tier } from "@/lib/tier";
-import type { FeedRow } from "@/lib/waitlist";
 
 import { Acts } from "./acts/Acts";
 import { ActRail } from "./ui/ActRail";
@@ -21,13 +20,7 @@ import { FlatScene } from "./FlatScene";
 // paints immediately while the WebGL bundle is still being fetched.
 const Scene = dynamic(() => import("./scene/Scene"), { ssr: false });
 
-export function Experience({
-  initialFeed,
-  countLabel,
-}: {
-  initialFeed: FeedRow[];
-  countLabel: string;
-}) {
+export function Experience() {
   const track = useRef<HTMLDivElement>(null);
   const progress = useMotionValue(0);
 
@@ -128,10 +121,25 @@ export function Experience({
   // ready — its images are plain DOM and are done as soon as the tier resolves.
   const entered = ready || tier === "minimal";
 
+  // A hard ceiling on the boot screen. `useHdriSource` already gives the one
+  // ~8MB asset a deadline, but every other texture (sentinel.png, throne.png,
+  // the pillars) loads through the scene's Suspense boundary with no timeout
+  // of its own — on a slow or congested connection any single one of them
+  // can leave `onReady` waiting forever, which is exactly a stuck boot
+  // counter with no way out. This does not cancel or speed up that loading;
+  // it just refuses to let the overlay block entry past a bounded wait,
+  // since a scene still finishing its textures in the background is a far
+  // better failure mode than a page that looks permanently broken.
+  useEffect(() => {
+    if (!webgl) return;
+    const ceiling = setTimeout(() => setReady(true), 12000);
+    return () => clearTimeout(ceiling);
+  }, [webgl]);
+
   return (
     <SceneContext.Provider value={runtime}>
       <a className="skip-link" href="#oath">
-        Skip to the waitlist
+        Skip to app link
       </a>
 
       {tier && (webgl ? <Scene mobile={mobile} /> : <FlatScene />)}
@@ -146,7 +154,7 @@ export function Experience({
         aria-hidden
       />
 
-      <Acts initialFeed={initialFeed} countLabel={countLabel} />
+      <Acts />
       <BrandMark ready={entered} />
       <ActRail />
       <AudioToggle ready={entered} />
